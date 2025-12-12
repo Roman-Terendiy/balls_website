@@ -2,16 +2,27 @@
 
 A single-page, non-scrollable landing website for selling sports balls with Telegram integration.
 
+## 🏗️ Architecture
+
+This project is split into two parts:
+
+1. **Static Frontend** - Next.js static export (generates `out/` folder)
+2. **Standalone API Server** - Node.js server for Telegram integration (`api-server.js`)
+
+This architecture allows deployment on shared hosting like Namecheap where you can:
+- Upload static files to `public_html`
+- Run the API server separately using Node.js Selector in cPanel
+
 ## Features
 
 - ✅ Single non-scrollable page (no scrolling, no swiping)
 - ✅ Full-screen background image
 - ✅ Responsive design (mobile & desktop)
 - ✅ Contact form with name and phone
-- ✅ Telegram bot integration
+- ✅ Telegram bot integration via standalone API server
 - ✅ Modern, clean UI
 
-## Project Setup
+## Local Development
 
 ### 1. Install Dependencies
 
@@ -21,17 +32,16 @@ npm install
 
 ### 2. Configure Environment Variables
 
-Create a `.env.local` file in the root directory:
-
+#### Frontend (.env.local):
 ```bash
-cp .env.example .env.local
+NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-Edit `.env.local` and add your Telegram bot credentials:
-
-```
-BOT_TOKEN=your_bot_token_here
-CHAT_ID=your_chat_id_here
+#### API Server (set when running):
+```bash
+export BOT_TOKEN=your_bot_token_here
+export CHAT_ID=your_chat_id_here
+export PORT=3001
 ```
 
 #### How to Get Telegram Credentials:
@@ -67,235 +77,226 @@ This project uses separate background images for mobile and desktop:
 
 **Supported formats:** JPG, PNG, WebP
 
-**To change image filenames or breakpoint:**
-- Edit `app/page.module.css`
-- Find `.container` class for mobile image
-- Find `@media (min-width: 768px)` for desktop image
-- Update file paths and/or `min-width` value as needed
+### 4. Run Development Servers
 
-### 4. Run Development Server
+**Terminal 1 - Start API Server:**
+```bash
+export BOT_TOKEN=your_bot_token
+export CHAT_ID=your_chat_id
+npm run api:dev
+```
+API server will run on `http://localhost:3001`
 
+**Terminal 2 - Start Frontend:**
 ```bash
 npm run dev
 ```
+Frontend will run on `http://localhost:3000`
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 5. Build for Production
+### 5. Build Static Frontend
 
 ```bash
 npm run build
-npm start
+# or
+npm run export
 ```
 
-## Deployment to Namecheap Hosting
+This generates a static `out/` folder with all HTML, CSS, and JS files ready for deployment.
 
-### Prerequisites
+## 📦 Deployment to Namecheap Shared Hosting
 
-1. Node.js 18+ installed on your hosting server
-2. SSH access to your hosting
-3. Domain: volleyballsfun.site (already configured)
+This project is designed for Namecheap shared hosting with two separate deployment steps:
 
-### Step-by-Step Deployment
+### Part 1: Deploy Static Frontend
 
-#### Option 1: Using Namecheap cPanel (Recommended)
+#### Step 1: Build Static Export
 
-1. **Build the project locally:**
+```bash
+npm run build
+```
+
+This creates the `out/` folder with all static files.
+
+#### Step 2: Upload to public_html
+
+1. Log into Namecheap cPanel
+2. Open **File Manager**
+3. Navigate to `public_html`
+4. Upload **all contents** of the `out/` folder:
+   - All HTML files
+   - `_next/` folder (with JS and CSS)
+   - `public/` folder (with images)
+
+**OR** upload the entire `out/` folder and rename it, then move contents.
+
+#### Step 3: Verify Frontend
+
+Visit `https://volleyballsfun.site` - the page should load (but form won't work yet until API is set up).
+
+---
+
+### Part 2: Deploy Standalone API Server
+
+#### Step 1: Upload API Server Files
+
+Upload these files to your hosting (can be in `public_html` or separate directory):
+- `api-server.js`
+- `package.json` (needed for dependencies)
+
+#### Step 2: Install Dependencies via SSH
+
+```bash
+ssh your_username@volleyballsfun.site
+cd ~/public_html  # or wherever you uploaded the files
+npm install --production
+```
+
+Note: The API server only needs Node.js built-in modules (http, url), so no additional dependencies required!
+
+#### Step 3: Configure Node.js Application in cPanel
+
+1. In cPanel, go to **"Node.js Selector"** or **"Node.js"**
+2. Click **"Create Application"**
+3. Fill in:
+   - **Application root:** `public_html` (or directory where api-server.js is)
+   - **Application URL:** Leave default or create subdomain like `api.volleyballsfun.site`
+   - **Application startup file:** `api-server.js` ⭐
+   - **Application mode:** `Production`
+   - **Node.js version:** Latest (18.x or 20.x)
+   - **Port:** `3001` (or any available port)
+4. Click **"Create"**
+
+#### Step 4: Set Environment Variables
+
+In Node.js Selector:
+1. Find your application
+2. Click **"Manage"** or **"Environment Variables"**
+3. Add:
+   - `BOT_TOKEN` = your Telegram bot token
+   - `CHAT_ID` = your Telegram chat ID
+   - `PORT` = `3001` (or your assigned port)
+
+#### Step 5: Start the Application
+
+1. In Node.js Selector, click **"Restart Application"**
+2. The API server should now be running
+
+#### Step 6: Configure Frontend to Use API
+
+1. In File Manager, edit the static HTML files or create `.env.production` (if using build-time env)
+2. **OR** better: Set environment variable before building:
    ```bash
+   NEXT_PUBLIC_API_URL=https://your-api-url.com
    npm run build
    ```
 
-2. **Upload files to your hosting:**
-   - Connect via FTP/SFTP to your Namecheap hosting
-   - Upload the following to your `public_html` folder:
-     - `.next` folder (entire folder)
-     - `public` folder (entire folder)
-     - `package.json`
-     - `package-lock.json` (if exists)
-     - `next.config.js`
-     - `node_modules` (or install on server - see below)
+If your API is on a different port/subdomain, update `NEXT_PUBLIC_API_URL` before building.
 
-3. **On your server via SSH:**
-   ```bash
-   cd ~/public_html
-   npm install --production
-   ```
+**For shared hosting, you'll likely need to:**
+- Use the full URL where your API server is accessible
+- Example: `NEXT_PUBLIC_API_URL=https://volleyballsfun.site:3001`
+- Or set up a subdomain/domain for the API
 
-4. **Set environment variables:**
-   - In cPanel, go to "Environment Variables" or "Select PHP Version" → "Environment Variables"
-   - Add:
-     - `BOT_TOKEN` = your bot token
-     - `CHAT_ID` = your chat ID
-   - OR create a `.env.production` file (if supported):
-     ```bash
-     echo "BOT_TOKEN=your_token" >> .env.production
-     echo "CHAT_ID=your_chat_id" >> .env.production
-     ```
+---
 
-5. **Configure Node.js app:**
-   - In cPanel, find "Node.js" or "Node.js Selector"
-   - Create a new application:
-     - Application root: `public_html`
-     - Application URL: `volleyballsfun.site`
-     - Application startup file: `server.js` (see below)
-     - Application mode: `Production`
+## 🔧 Complete Deployment Checklist
 
-6. **Create server.js in public_html:**
-   ```javascript
-   const { createServer } = require('http')
-   const { parse } = require('url')
-   const next = require('next')
+### Frontend:
+- [ ] Build static export: `npm run build`
+- [ ] Upload `out/` folder contents to `public_html`
+- [ ] Verify site loads at `https://volleyballsfun.site`
+- [ ] Set `NEXT_PUBLIC_API_URL` environment variable (or rebuild with it)
 
-   const dev = process.env.NODE_ENV !== 'production'
-   const hostname = 'localhost'
-   const port = process.env.PORT || 3000
+### API Server:
+- [ ] Upload `api-server.js` to server
+- [ ] Create Node.js application in cPanel
+- [ ] Set startup file to `api-server.js`
+- [ ] Set environment variables (`BOT_TOKEN`, `CHAT_ID`, `PORT`)
+- [ ] Start/restart the application
+- [ ] Test API endpoint: `curl https://your-api-url/api/telegram`
 
-   const app = next({ dev, hostname, port })
-   const handle = app.getRequestHandler()
+### Final Testing:
+- [ ] Visit website
+- [ ] Fill out form
+- [ ] Submit form
+- [ ] Check Telegram for message
+- [ ] Test on mobile device
 
-   app.prepare().then(() => {
-     createServer(async (req, res) => {
-       try {
-         const parsedUrl = parse(req.url, true)
-         await handle(req, res, parsedUrl)
-       } catch (err) {
-         console.error('Error occurred handling', req.url, err)
-         res.statusCode = 500
-         res.end('internal server error')
-       }
-     }).listen(port, (err) => {
-       if (err) throw err
-       console.log(`> Ready on http://${hostname}:${port}`)
-     })
-   })
-   ```
+---
 
-7. **Start the application:**
-   - In Node.js Selector, click "Run NPM install" if needed
-   - Click "Restart Application"
+## 🚀 Updating the Site
 
-#### Option 2: Using PM2 (If you have full server access)
+### Update Frontend:
+1. Make changes to code
+2. Build: `npm run build`
+3. Upload new `out/` folder contents to `public_html`
 
-1. **Connect via SSH:**
-   ```bash
-   ssh your_username@volleyballsfun.site
-   ```
+### Update API Server:
+1. Make changes to `api-server.js`
+2. Upload new file to server
+3. Restart Node.js application in cPanel
 
-2. **Clone or upload your project:**
-   ```bash
-   cd ~/public_html
-   # Upload your project files here
-   ```
+---
 
-3. **Install dependencies:**
-   ```bash
-   npm install --production
-   ```
-
-4. **Create `.env.production`:**
-   ```bash
-   nano .env.production
-   ```
-   Add:
-   ```
-   BOT_TOKEN=your_bot_token_here
-   CHAT_ID=your_chat_id_here
-   NODE_ENV=production
-   PORT=3000
-   ```
-
-5. **Install PM2:**
-   ```bash
-   npm install -g pm2
-   ```
-
-6. **Build and start:**
-   ```bash
-   npm run build
-   pm2 start npm --name "balls-landing" -- start
-   pm2 save
-   pm2 startup
-   ```
-
-7. **Configure reverse proxy (if needed):**
-   - Set up Nginx or Apache to proxy to `localhost:3000`
-   - Or configure port forwarding in cPanel
-
-### Verify Deployment
-
-1. Visit `https://volleyballsfun.site`
-2. Fill out the form and submit
-3. Check your Telegram - you should receive a message
-
-### Troubleshooting
-
-**If the page doesn't load:**
-- Check that Node.js application is running in cPanel
-- Verify port configuration matches
-- Check server logs in cPanel
-
-**If Telegram messages don't send:**
-- Verify `BOT_TOKEN` and `CHAT_ID` are set correctly
-- Check server logs for API errors
-- Test the bot manually in Telegram
-
-**If environment variables don't work:**
-- Some hosts require setting them through cPanel interface
-- Try using `.env.production` file instead
-- Contact Namecheap support for Node.js environment variable setup
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 balls/
-├── app/
-│   ├── api/
-│   │   └── telegram/
-│   │       └── route.ts          # Telegram API endpoint
-│   ├── globals.css               # Global styles
-│   ├── layout.tsx                # Root layout
-│   ├── page.tsx                  # Main landing page
-│   └── page.module.css           # Page styles
-├── public/
-│   ├── ball-background-mobile.jpg    # Mobile background image (replace this)
-│   └── ball-background-desktop.jpg   # Desktop background image (replace this)
-├── .env.example                  # Environment variables template
-├── next.config.js                # Next.js configuration
-├── package.json                  # Dependencies
-└── README.md                     # This file
+├── app/                    # Next.js app directory
+│   ├── page.tsx           # Main landing page
+│   ├── page.module.css    # Page styles
+│   ├── layout.tsx         # Root layout
+│   └── globals.css        # Global styles
+├── public/                 # Static assets
+│   ├── ball-background-mobile.jpg
+│   └── ball-background-desktop.jpg
+├── api-server.js          # Standalone Telegram API server
+├── next.config.js         # Next.js configuration (static export)
+├── package.json           # Dependencies
+└── out/                   # Generated static files (after build)
 ```
 
-## Customization
+---
 
-### Change Text Content
+## 🔍 Troubleshooting
 
-Edit `app/page.tsx`:
-- Line ~25: Change headline text
-- Lines ~26-31: Modify characteristics list
+### Frontend not loading:
+- Check that all files from `out/` are uploaded
+- Verify `_next/` folder is uploaded
+- Check file permissions
 
-### Change Colors/Styling
+### Form not submitting:
+- Verify `NEXT_PUBLIC_API_URL` is set correctly
+- Check API server is running
+- Check browser console for CORS errors
+- Verify API URL is accessible
 
-Edit `app/page.module.css`:
-- Button gradient: Line ~96 (`.button` background)
-- Overlay darkness: Line ~32 (`.container::before` background)
-- Text shadows: Lines throughout
+### API server not starting:
+- Check Node.js version (should be 18+)
+- Verify `api-server.js` is in correct directory
+- Check environment variables are set
+- View logs in Node.js Selector
 
-### Change Form Fields
+### Telegram messages not sending:
+- Verify `BOT_TOKEN` is correct
+- Verify `CHAT_ID` is correct
+- Test bot manually in Telegram
+- Check API server logs
 
-Edit `app/page.tsx`:
-- Add/remove input fields in the form section
-- Update validation in `handleSubmit` function
-- Update Telegram message format in `app/api/telegram/route.ts`
+---
 
-## Support
+## 📞 Support
 
-For issues or questions:
+For deployment issues:
 1. Check server logs in cPanel
-2. Verify environment variables are set
-3. Test Telegram bot manually
-4. Ensure Node.js version is 18+
+2. Verify all environment variables
+3. Test API endpoint manually
+4. Check browser console for errors
+
+---
 
 ## License
 
 Private project - All rights reserved
-

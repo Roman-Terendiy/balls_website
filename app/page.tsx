@@ -21,7 +21,8 @@ export default function Home() {
     setMessage('')
 
     try {
-      const response = await fetch('/api/telegram', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/api/telegram`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
