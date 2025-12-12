@@ -1,8 +1,10 @@
 ---
 deployment:
   tasks:
-    - /bin/cp -R * $HOME/public_html/
-    - cd $HOME/public_html
-    - /bin/npm install --production
-    - /bin/npm run build
+    - export DEPLOYPATH=$HOME/public_html
+    - /bin/cp -R . $DEPLOYPATH/ 2>/dev/null || true
+    - /bin/cp -R * $DEPLOYPATH/ 2>/dev/null || true
+    - cd $DEPLOYPATH
+    - /usr/local/bin/npm install --production || /bin/npm install --production
+    - /usr/local/bin/npm run build || /bin/npm run build
 
