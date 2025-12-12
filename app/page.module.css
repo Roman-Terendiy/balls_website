@@ -1,0 +1,259 @@
+.container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* MOBILE BACKGROUND IMAGE: Default image for mobile devices
+     Place your mobile background image in public/ folder as ball-background-mobile.jpg
+     To change the filename, update the path below */
+  background-image: url('/ball-background-mobile.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* DESKTOP BACKGROUND IMAGE: Separate image for desktop/tablet devices (768px and wider)
+   Place your desktop background image in public/ folder as ball-background-desktop.jpg
+   To change the filename or breakpoint, update the path and min-width value below */
+@media (min-width: 768px) {
+  .container {
+    background-image: url('/ball-background-desktop.jpg');
+  }
+}
+
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* OVERLAY TRANSPARENCY: Change the last value (0.5) to adjust overall dark overlay
+     Range: 0.0 (fully transparent/no overlay) to 1.0 (fully opaque/black)
+     Example: 0.3 = 30% opacity (lighter), 0.7 = 70% opacity (darker) */
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+}
+
+.textSection {
+  text-align: center;
+  /* TEXT TRANSPARENCY: Change the opacity value (0.85) to adjust text transparency
+     Range: 0.0 (fully transparent/invisible) to 1.0 (fully opaque)
+     Example: 0.7 = more transparent, 0.9 = less transparent */
+  color: rgba(255, 255, 255, 0.7);
+  /* TEXT SHADOW TRANSPARENCY: Change the last value (0.8) to adjust text shadow darkness
+     Range: 0.0 (no shadow) to 1.0 (fully opaque shadow)
+     Example: 0.5 = lighter shadow, 1.0 = stronger shadow for better text visibility */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.headline {
+  font-size: clamp(32px, 6vw, 48px);
+  font-weight: bold;
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+
+.characteristics {
+  list-style: none;
+  font-size: clamp(16px, 3vw, 20px);
+  line-height: 1.8;
+}
+
+.characteristics li {
+  margin-bottom: 8px;
+}
+
+.form {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 16px;
+  /* INPUT BORDER TRANSPARENCY: Change the last value (0.4) to adjust border visibility
+     Range: 0.0 (invisible) to 1.0 (fully opaque white)
+     Example: 0.2 = very transparent, 0.8 = more visible */
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  /* INPUT BACKGROUND TRANSPARENCY: Change the last value (0.2) to adjust input field transparency
+     Range: 0.0 (fully transparent) to 1.0 (fully opaque white)
+     Example: 0.1 = very transparent (20% visible), 0.5 = 50% transparent, 1.0 = solid white
+     Lower values = more background visible, higher values = more solid background */
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  transition: all 0.3s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.input:focus {
+  outline: none;
+  /* FOCUS BORDER: Change 0.7 to adjust border visibility when input is focused */
+  border-color: rgba(255, 255, 255, 0.7);
+  /* FOCUS BACKGROUND: Change 0.3 to adjust background opacity when input is focused
+     Typically slightly higher than default (0.2) for better visibility */
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.input::placeholder {
+  /* PLACEHOLDER TEXT TRANSPARENCY: Change 0.7 to adjust placeholder text visibility
+     Range: 0.0 (invisible) to 1.0 (fully opaque white)
+     Example: 0.5 = dimmer placeholder, 0.9 = brighter placeholder */
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.button {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  /* BUTTON BACKGROUND TRANSPARENCY: Change the last value (0.6) in both rgba() to adjust button transparency
+     Range: 0.0 (fully transparent) to 1.0 (fully opaque)
+     Example: 0.3 = very transparent (background very visible), 0.8 = less transparent
+     Both gradient colors should have the same opacity value for consistency */
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.6) 100%);
+  /* BUTTON BORDER TRANSPARENCY: Change 0.3 to adjust border visibility */
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  /* HOVER STATE TRANSPARENCY: Change 0.75 to adjust button opacity on hover
+     Typically slightly higher (less transparent) than default (0.6) for feedback */
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.75) 0%, rgba(118, 75, 162, 0.75) 100%);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.message {
+  text-align: center;
+  color: white;
+  font-size: 14px;
+  padding: 10px;
+  /* MESSAGE BOX TRANSPARENCY: Change 0.6 to adjust message background darkness
+     Range: 0.0 (transparent) to 1.0 (fully opaque black)
+     Example: 0.4 = lighter background, 0.8 = darker background */
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 6px;
+  margin-top: 8px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .content {
+    gap: 30px;
+    padding: 15px;
+  }
+
+  .headline {
+    margin-bottom: 20px;
+  }
+
+  .characteristics {
+    line-height: 1.6;
+  }
+
+  .characteristics li {
+    margin-bottom: 6px;
+  }
+
+  .form {
+    gap: 12px;
+  }
+
+  .input {
+    padding: 12px 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .button {
+    padding: 14px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    gap: 25px;
+    padding: 12px;
+  }
+
+  .headline {
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+
+  .characteristics {
+    font-size: 14px;
+  }
+
+  .form {
+    max-width: 100%;
+  }
+}
+
+/* Prevent scrolling on all devices */
+@media (orientation: landscape) and (max-height: 500px) {
+  .content {
+    gap: 20px;
+  }
+
+  .headline {
+    font-size: clamp(24px, 4vh, 32px);
+    margin-bottom: 12px;
+  }
+
+  .characteristics {
+    font-size: clamp(12px, 2vh, 16px);
+    line-height: 1.4;
+  }
+
+  .characteristics li {
+    margin-bottom: 4px;
+  }
+}
+
