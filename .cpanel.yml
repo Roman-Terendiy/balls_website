@@ -1,10 +1,21 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=$HOME/public_html
-    - /bin/cp -R . $DEPLOYPATH/ 2>/dev/null || true
-    - /bin/cp -R * $DEPLOYPATH/ 2>/dev/null || true
+    # Set deployment path - cPanel will automatically replace $HOME with your home directory
+    - export DEPLOYPATH=$HOME/public_html/
+    # Copy directories
+    - /bin/cp -R app $DEPLOYPATH
+    - /bin/cp -R public $DEPLOYPATH
+    # Copy individual configuration files
+    - /bin/cp package.json $DEPLOYPATH
+    - /bin/cp package-lock.json $DEPLOYPATH
+    - /bin/cp next.config.js $DEPLOYPATH
+    - /bin/cp tsconfig.json $DEPLOYPATH
+    - /bin/cp server.js $DEPLOYPATH
+    # Change to deployment directory
     - cd $DEPLOYPATH
+    # Install dependencies
     - /usr/local/bin/npm install --production || /bin/npm install --production
+    # Build the Next.js application
     - /usr/local/bin/npm run build || /bin/npm run build
 
