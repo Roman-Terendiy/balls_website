@@ -1,0 +1,9 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/$(whoami)/public_html
+    - /bin/cp -R * $DEPLOYPATH/
+    - cd $DEPLOYPATH
+    - /bin/npm install --production
+    - /bin/npm run build
+
